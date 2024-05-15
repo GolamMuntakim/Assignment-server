@@ -184,6 +184,26 @@ async function run() {
         res.status(500).send('Internal Server Error');
       }
     });
+
+     // get all assignments  data from db for pagination
+     app.get('/all-assignments', async(req,res)=>{
+      const size = parseInt(req.query.size)
+      const page = parseInt(req.query.page) -1
+      const filter = req.query.filter
+      console.log(size, page)
+      let query = {}
+      if(filter) query = {difficulty_level : filter}
+      const result = await assignmentsCollection.find(query).skip(page*size).limit(size).toArray()
+      res.send(result)
+   })
+     // get all assignments  count from db 
+     app.get('/assignments-count', async(req,res)=>{
+      const filter = req.query.filter
+      let query = {}
+      if(filter) query = {difficulty_level:filter}
+      const count = await assignmentsCollection.countDocuments(query)
+      res.send({count})
+   })
     
 
     await client.db("admin").command({ ping: 1 });
