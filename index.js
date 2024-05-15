@@ -7,7 +7,7 @@ require('dotenv').config()
 const port = process.env.PORT || 5000
 const app = express()
 const corsOption = {
-    origin:['http://localhost:5173', 'http://localhost:5174','https://b9-a11-37619.web.app','https://b9-a11-37619.firebaseapp.com'],
+    origin:['http://localhost:5173', 'http://localhost:5174','https://b9-a11-37619.web.app','https://b9-a11-37619.firebaseapp.com', 'https://assigment-b9-a11.netlify.app'],
     credentials : true,
     optionSuccessStatus:200,
 }
