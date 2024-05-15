@@ -95,8 +95,19 @@ async function run() {
      //save submitted data in database
      app.post('/submit', async(req,res)=>{
       const submittedData = req.body
+      const query = {
+        email : submittedData.email,
+        assignmentId: submittedData.assignmentId
+      }
+      const alreadysubmittedAssignments = await submittedCollection.findOne(query)
+      if(alreadysubmittedAssignments){
+        return res 
+                .status(400)
+                .send('You have already submitted assignment ')
+      }
       const result = await submittedCollection.insertOne(submittedData)
       res.send(result)
+
      })
      //save assignments in database 
      app.post('/assignment', async(req,res)=>{
@@ -147,12 +158,7 @@ async function run() {
       res.send(result)
      })
     //  save marks in marks  
-    // app.put('/mysubmittedassignments/:id', async(req,res)=>{
-    //   const id = req.body
-    //   const result = await marksCollection.insertOne(id)
-    //   console.log(result)
-    //   res.send(result)
-    //  })
+  
     app.post('/mysubmittedassignments/:id', async (req, res) => {
       const id = req.params.id; 
       const newData = req.body; 
