@@ -33,7 +33,6 @@ const verifyToken = (req,res,next)=>{
      
 }
 
-
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.ajfjwu7.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -44,6 +43,11 @@ const client = new MongoClient(uri, {
     deprecationErrors: true,
   }
 });
+const cookieOption =  {
+  httpOnly:true,
+  secure:process.env.NODE_ENV ==='production' ? true : false,
+  sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict'
+}
 
 async function run() {
   try {
@@ -57,28 +61,13 @@ async function run() {
       const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET,{
         expiresIn: '365d',
       })
-      res.cookie('token' ,token,{
-        httpOnly:true,
-        secure:process.env.NODE_ENV ==='production',
-        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
-      })
-      .send({success : true})
+      res.cookie('token' ,token,cookieOption).send({success : true})
     })
 
     //clear cookie on logout
     app.get('/logout',(req,res)=>{
-      res.clearCookie('token' ,{
-        httpOnly:true,
-        secure:process.env.NODE_ENV ==='production',
-        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
-        maxAge:0,
-      })
-      .send({success : true})
+      res.clearCookie('token' ,{...cookieOption, maxAge:0 }).send({success : true})
     })
-
-
-
-
 
      // get all assignments  data from db
      app.get('/assignments', async(req,res)=>{
@@ -116,12 +105,14 @@ async function run() {
       res.send(result)
      })
      //delete assignments database 
-     app.delete('/deleteassignment/:email',verifyToken, async(req,res)=>{
-      const email = req.params.email
-      const query = {'maker.email' : email}
+    app.delete('/deleteassignment/:id', async(req, res)=>{
+      const id = req.params.id
+      const query = {_id:new ObjectId(id)}
+      // const query = {'maker.email' : email}
       const result = await assignmentsCollection.deleteOne(query)
       res.send(result)
-     })
+    })
+     
      //update assignment data 
      app.put('/updateassignment/:id',async(req,res)=>{
       const id = req.params.id
