@@ -181,17 +181,24 @@ async function run() {
       const size = parseInt(req.query.size)
       const page = parseInt(req.query.page) -1
       const filter = req.query.filter
-      console.log(size, page)
-      let query = {}
-      if(filter) query = {difficulty_level : filter}
+      const search= req.query.search
+
+      console.log(size, page,search)
+      let query = {
+        title :{ $regex : search, $options : 'i'},
+      }
+      if(filter) query.difficulty_level = filter
       const result = await assignmentsCollection.find(query).skip(page*size).limit(size).toArray()
       res.send(result)
    })
      // get all assignments  count from db 
      app.get('/assignments-count', async(req,res)=>{
       const filter = req.query.filter
-      let query = {}
-      if(filter) query = {difficulty_level:filter}
+      const search= req.query.search
+      let query = {
+        title :{ $regex : search, $options : 'i'},
+      }
+      if(filter) query.difficulty_level = filter
       const count = await assignmentsCollection.countDocuments(query)
       res.send({count})
    })
